@@ -1,0 +1,64 @@
+go fish rules 
+
+THE PACK
+The standard 52-card pack is used. Some cards will be dealt and the rest will form the stock pile.
+
+OBJECT OF THE GAME
+The goal is to win the most "books" of cards. A book is any four of a kind, such as four kings, four aces, and so on.
+
+RANK OF CARDS
+The cards rank from ace (high) to two (low). The suits are not important, only the card numbers are relevant, such as two 3s, two 10s, and so on.
+
+THE DEAL
+Any player deals one card face up to each player. The player with the lowest card is the dealer. The dealer shuffles the cards, and the player to the right cuts them.
+
+The dealer completes the cut and deals the cards clockwise one at a time, face down, beginning with the player to the left. If two or three people are playing, each player receives seven cards. If four or five people are playing, each receives five cards. The remainder of the pack is placed face down on the table to form the stock.
+
+THE PLAY
+The player to the left of the dealer looks directly at any opponent and says, for example, "Give me your kings," usually addressing the opponent by name and specifying the rank that they want, from ace down to two. The player who is "fishing “must have at least one card of the rank that was asked for in their hand. The player who is addressed must hand over all the cards requested. If the player has none, they say, "Go fish!" and the player who made the request draws the top card of the stock and places it in their hand.
+
+If a player gets one or more cards of the named rank that was asked for, they are entitled to ask the same or another player for a card. The player can ask for the same card or a different one. So long as the player succeeds in getting cards (makes a catch), their turn continues. When a player makes a catch, they must reveal the card so that the catch is verified. If a player gets the fourth card of a book, the player shows all four cards, places them on the table face up in front of everyone, and plays again.
+
+If the player goes fishing without "making a catch" (does not receive a card he asked for), the turn passes to the left.
+
+The game ends when all thirteen books have been won. The winner is the player with the most books. During the game, if a player is left without cards, they may (when it's their turn to play), draw from the stock and then ask for cards of that rank. If there are no cards left in the stock, they are out of the game.
+
+
+
+coding idea how to make it work 
+
+- start from 2 person 
+- split the deck into 2 (with the deck has been shuffles)
+- flip coin animation ? who to start first? 
+- player1 => decide what card he wants => using scroll down input then press submit 
+=> so there go fish or pass the card to user 
+=> if there isnt a match change player turn
+=> repeat until 4 card match 
+=> once there a full match of 4 cards 
+=> auto change it into a book 
+=> once all 13 books won =>player with most book win 
+
+1) Asking your opponent for a card
+
+Pick a card number from the ones you hold in your hand. Then, choose another player and ask if they have the  given card number. For example: “Do you have any 3’s?”
+
+If that person has one or more of the called card, they are given to you and become part of your hand. Anytime you get cards from another player, you may repeat this process.
+
+It is not necessary to ask the same player – each time you receive cards, you may chose any of the denomination of cards you hold in your hand and pick any player to ask for matches.
+
+2) Go Fish
+
+If your opponent does not have the card number you asked for, they will say “Go Fish”. At this point, you draw a card from the draw pile.
+
+If the card you draw matches the card number you asked your opponent for, show the card to your opponents, put it in your hand, and continue playing your turn.
+
+If the card does not match the card number you asked for, the card becomes part of your hand, and it is your opponent’s turn.
+
+3) Creating sets of four
+As soon as you have a set of 4 cards of the same number in your hand (one of each suit), you immediately place these cards face up on the table.
+
+Winning the Game
+
+The game ends when one person lays all their cards on the table, or the draw pile is empty, whichever comes first. The person with the most sets of four wins the game.
+
+The Go Fish rules are very simple, but the game is very fun. House rules can make variations on game play, such as making the draw pile a pool of cards, requiring players to request a specific card (i.e., ‘the 5 of diamonds’ instead of just asking for a card number like ‘5’), and more.
