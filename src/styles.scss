@@ -1,0 +1,40 @@
+.item {
+  padding: 10px;
+  margin: 10px;
+  border: 1px solid grey;
+  width: 28%;
+  display: inline-block;
+  word-wrap: break-word;
+}
+
+.SingleCardDiv {
+  padding: 10px;
+  margin: 10px;
+  border: 1px solid grey;
+  width: 28%;
+}
+
+.Divplayer1cards {
+  display: flex;
+}
+
+.Divplayer2cards {
+  display: flex;
+}
+
+.maindeckDiv {
+  display: flex;
+  justify-content: space-between;
+  height: 50vh;
+  align-items: center;
+}
+
+.rightDeckDiv {
+  display: flex;
+  flex-direction: column;
+}
+
+.middleDeckDiv {
+  display: flex;
+  flex-direction: column;
+}
