@@ -1,4 +1,25 @@
-export default function initUserController(db) {
+export default function initUserController(db,wss) {
+
+    wss.on('connection', function connection(ws) {
+  //console.log('Parsing session from request...');
+
+  // open and close connection 
+    ws.on("open", () => console.log("opened!"))
+    ws.on("close", () => console.log("closed!"))
+
+    // testing message is working and connection is working on sever side , able to recevice from client 
+    ws.on('message', (message) => {
+        // //log the received message and send it back to the client
+        // console.log('received: %s', message);
+        // ws.send(`Hello, you sent -> ${message}`);
+    });
+
+
+    //send immediatly a feedback to the incoming connection    
+   // ws.send('Hi there, I am a WebSocket server');
+});
+  
+
   const getUserById = async (request, response) => {
     try {
       console.log('sadasdasds');

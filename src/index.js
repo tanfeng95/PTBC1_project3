@@ -2,12 +2,80 @@ import axios from 'axios';
 import './styles.scss';
 
 const mainDiv = document.querySelector('.mainDiv')
+const lobbyDiv = document.querySelector('.lobbyDiv')
+const loginDiv = document.querySelector('.loginDiv')
 let currentGame = null
 let currentPlayer  ;
 
 
+// login screen
+const pUsername = document.createElement('p');
+pUsername.innerHTML = 'username : ';
+const inputUsername = document.createElement('input');
+inputUsername.setAttribute('type', 'text');
 
-const createGame = () =>{
+const pPassword = document.createElement('p');
+pPassword.innerHTML = 'password : ';
+const inputPassword = document.createElement('input');
+inputPassword.setAttribute('type', 'text');
+
+const btnLogin = document.createElement('button');
+btnLogin.innerHTML = 'sign in';
+btnLogin.addEventListener('click', () => { login(); });
+
+const pWrongInput = document.createElement('p');
+
+loginDiv.append(pUsername, inputUsername, pPassword, inputPassword, btnLogin, pWrongInput);
+
+let playerId;
+let playerPosition
+
+const login = () => {
+  const data = {
+    username: inputUsername.value,
+    password: inputPassword.value,
+  };
+  axios
+    .post('/users/signin', data)
+    .then((response) => {
+      console.log(response);
+      const { data } = response;
+      if (data === false) {
+        pWrongInput.innerHTML = 'wrong email or password';
+      } else {
+        // console.log(data.getUser[0].id);
+        playerId = data.getUser[0].id;
+        console.log(`playerId =`  + playerId)
+        //loginDiv.style.display = 'none';
+        // create a start game button
+
+        // startGameBtn.innerHTML = 'start game';
+        // startGameBtn.addEventListener('click', () => { startGame(); });
+        // btnDiv.appendChild(startGameBtn);
+      }
+    });
+};
+
+
+const createGameBtn = document.createElement('button');
+createGameBtn.innerHTML = 'create game';
+lobbyDiv.appendChild(createGameBtn);
+
+const joinGameLabel = document.createElement('label')
+joinGameLabel.innerHTML = 'game id'
+lobbyDiv.appendChild(joinGameLabel)
+
+const joinGameInput = document.createElement('input')
+joinGameInput.setAttribute('type','text')
+lobbyDiv.appendChild(joinGameInput)
+
+const joinGameBtn = document.createElement('button');
+joinGameBtn.innerHTML = 'join game'
+lobbyDiv.appendChild(joinGameBtn)
+
+
+
+const createGame = async () =>{
   const maindeckDiv = document.createElement('div')
   maindeckDiv.setAttribute('class','maindeckDiv')
   const player1CardsDiv = document.createElement('div')
@@ -38,7 +106,7 @@ const createGame = () =>{
   mainDiv.append(player1CardsDiv,maindeckDiv,player2CardsDiv);
 
   // create deck or game state 
-  axios
+  await axios
   .get('/startGame')
   .then((gameState)=>{
     currentGame = gameState.data;
@@ -51,6 +119,7 @@ const createGame = () =>{
     displayCards(currentGame.player2Hand , Divplayer2cards)
     //display deck 
     displayCardDeck(currentGame.cardDeck,maindeckDiv)
+    playerPosition = 'player1'
   })
 
 }
@@ -142,6 +211,7 @@ const GoFish =  () =>{
     card : getSelect.value,
     currentPlayer : currentPlayer };
   console.log(playerSelectedCard)
+  console.log(`currentGame = ` +currentGame)
   try{
        axios
       .post(`/game/goFish/${currentGame.id}`,playerSelectedCard)
@@ -187,24 +257,26 @@ const GoFish =  () =>{
 
 
 }
+
+
+// then to call it, plus stitch in '4' in the third group
+const guid = () => (S4() + S4() + "-" + S4() + "-4" + S4().substr(0,3) + "-" + S4() + "-" + S4() + S4() + S4()).toLowerCase();
+ function S4() {
+    return (((1+Math.random())*0x10000)|0).toString(16).substring(1); 
+}
+
 import "@babel/polyfill";
+
+let gameId = null;
+let clientId = null;
+
 (async function() {
 
-    const ws = await connectToServer();    
 
-    document.body.onmousemove = (evt) => {
-        const messageBody = { x: evt.clientX, y: evt.clientY };
-        ws.send(JSON.stringify(messageBody));
-    };
+  const ws = await connectToServer(); 
 
-    ws.onmessage = (webSocketMessage) => {
-        const messageBody = JSON.parse(webSocketMessage.data);
-        const cursor = getOrCreateCursorFor(messageBody);
-        cursor.style.transform = `translate(${messageBody.x}px, ${messageBody.y}px)`;
-    };
-        
-    async function connectToServer() {    
-        const ws = new SockJS('http://localhost:7071/ws');
+  async function connectToServer() {    
+        const ws = new WebSocket('ws://localhost:3005/');
         return new Promise((resolve, reject) => {
             const timer = setInterval(() => {
                 if(ws.readyState === 1) {
@@ -213,27 +285,151 @@ import "@babel/polyfill";
                 }
             }, 10);
         });   
+  }
+  createGameBtn.addEventListener('click',async () => {
+
+    await createGame()
+
+    const createNewGame = {
+        "method" : 'create',
+        gameId : currentGame.id,
+        clientId : clientId
+    }
+    ws.send(JSON.stringify(createNewGame))
+   
+})
+
+joinGameBtn.addEventListener('click', () =>{
+
+    
+
+    if(gameId == null){
+      gameId = joinGameInput.value
     }
 
-    function getOrCreateCursorFor(messageBody) {
-        const sender = messageBody.sender;
-        const existing = document.querySelector(`[data-sender='${sender}']`);
-        if (existing) {
-            return existing;
+    const joinGame = {
+      'method' : 'join',
+      'clientId' : clientId,
+      'gameId' : gameId
+    }
+
+
+    ws.send(JSON.stringify(joinGame));
+
+})
+
+
+  ws.onmessage=  (message) => {
+    //message.data
+    //console.log('client side js' + message.data)
+    const response = JSON.parse(message.data);
+
+    if(response.method === 'created'){
+      gameId = response.game.gameId
+      console.log(`game created with game id = ${gameId}`)
+
+    }
+
+    if(response.method === 'join'){
+      const joiningMessage = response.message;
+      console.log(joiningMessage)
+      console.log(response.game)
+      const dbState = response.DBGameState;
+      console.log(dbState)
+      createDivs()
+      const maindeckDiv = document.querySelector('.maindeckDiv')
+      displayCardDeck(dbState.gameState.cardDeck,maindeckDiv)
+      currentGame = dbState
+      currentPlayer = dbState.gameState.currentplayer
+      playerPosition = 'player2'
+      // update accordingly 
+    }
+
+    if(response.method === 'connect'){
+      clientId = response.clientId
+      console.log(`client id set successfullt id = ${clientId}`)
+    }
+
+    if(response.method === 'update'){
+      //console.log(`updating state in progress`)
+      var dbState = response.DBGameState;
+      //console.log(dbState)
+      updateUI(dbState);
+    }
+  }
+
+  
+  // document.body.onmousemove = (evt) => {
+  //       const messageBody = { x: evt.clientX, y: evt.clientY };
+  //       ws.send(JSON.stringify(messageBody));
+  // };
+
+
+
+ })();
+
+const updateUI = (dbState) =>{
+
+        const player1cardDiv = document.querySelector('.Divplayer1cards')
+        //console.log(player1cardDiv)
+        player1cardDiv.innerHTML = ''
+        displayCards(dbState.gameState.player1Hand,player1cardDiv)
+        // update player 2 hand
+        const player2cardDiv = document.querySelector('.Divplayer2cards')
+        player2cardDiv.innerHTML = ''
+        displayCards(dbState.gameState.player2Hand,player2cardDiv)
+
+        // update books 
+        const numberofBookDiv = document.querySelector('.numberofBookDiv')
+        numberofBookDiv.innerHTML = 
+        `player 1 book = ${dbState.gameState.player1Book} </br>
+        player 2 book = ${dbState.gameState.player2Book}`
+
+        // update remainding cards 
+        const remaindingcardDiv = document.querySelector('.remaindingcardDiv')
+        remaindingcardDiv.innerHTML = `remainding cards in deck = ${dbState.gameState.cardDeck.length}`
+
+        // update current state 
+        const cardStateDiv = document.querySelector('.cardStateDiv')
+        if(dbState.gameState.winner === ''){
+          cardStateDiv.innerHTML = `current state = player ${dbState.gameState.currentplayer}`
+          currentPlayer = dbState.gameState.currentplayer;
+        } 
+        else{
+          cardStateDiv.innerHTML = `winner is  player ${dbState.gameState.winner}`
         }
-        
-        const template = document.getElementById('cursor');
-        const cursor = template.content.firstElementChild.cloneNode(true);
-        const svgPath = cursor.getElementsByTagName('path')[0];    
-            
-        cursor.setAttribute("data-sender", sender);
-        svgPath.setAttribute('fill', `hsl(${messageBody.color}, 50%, 50%)`);    
-        document.body.appendChild(cursor);
+}
 
-        return cursor;
-    }
+const createDivs = () =>{
 
-})();
+      const maindeckDiv = document.createElement('div')
+      maindeckDiv.setAttribute('class','maindeckDiv')
+      const player1CardsDiv = document.createElement('div')
+      player1CardsDiv.setAttribute('class','player1CardsDiv')
+      
+      // player 1 name
+      const DivPlayer1Name = document.createElement('div')
+      DivPlayer1Name.innerHTML = 'player 1'
+        // this is the card div for cards 
+      const Divplayer1cards = document.createElement('div')
+      Divplayer1cards.setAttribute('class','Divplayer1cards')
 
 
-createGame()
+      player1CardsDiv.append(DivPlayer1Name,Divplayer1cards)
+
+
+      const player2CardsDiv = document.createElement('div')
+      player2CardsDiv.setAttribute('class', 'player2CardsDiv')
+
+      const DivPlayer2Name = document.createElement('div')
+      DivPlayer2Name.innerHTML = 'player 2'
+      // this is the card div for cards 
+      const Divplayer2cards = document.createElement('div')
+      Divplayer2cards.setAttribute('class','Divplayer2cards')
+
+      player2CardsDiv.append(DivPlayer2Name,Divplayer2cards)
+
+      mainDiv.append(player1CardsDiv,maindeckDiv,player2CardsDiv);
+
+   
+}

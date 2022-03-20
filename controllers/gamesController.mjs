@@ -88,6 +88,14 @@ const makeDeck = function () {
   return deck;
 };
 
+// then to call it, plus stitch in '4' in the third group
+const guid = () => (S4() + S4() + "-" + S4() + "-4" + S4().substr(0,3) + "-" + S4() + "-" + S4() + S4() + S4()).toLowerCase();
+ function S4() {
+    return (((1+Math.random())*0x10000)|0).toString(16).substring(1); 
+}
+ 
+
+
 /*
  * ========================================================
  * ========================================================
@@ -100,8 +108,148 @@ const makeDeck = function () {
  * ========================================================
  * ========================================================
  */
+// hash map of game and clients 
+const games = {};
+const clients = {};
 
-export default function initGamesController(db) {
+import WebSocket , { WebSocketServer }   from 'ws'
+
+export default function initGamesController(db,wss) {
+
+  
+const getGameState = async(gameId) =>{
+        const DBGameState = await db.Game.findByPk(gameId);
+        console.log(DBGameState)
+        return DBGameState;
+}
+
+
+
+  wss.on('connection', function connection(ws) {
+
+  const updateGameState = async () =>{
+  
+    for (const g of Object.keys(games)) {
+            const game = games[g]
+            const DBGameState = await db.Game.findByPk(game.gameId);
+
+           // console.log(`db game state ` +DBGameState)
+
+            const payLoad = {
+                "method": "update",
+                "game": game,
+                'DBGameState': DBGameState
+            }
+
+            game.clients.forEach(c=> {
+                ws.send(JSON.stringify(payLoad))
+            })
+        }
+
+      setTimeout(updateGameState, 500);
+  }
+
+
+  // opening of server and creating a new client id and make sure it connected to server 
+  let clientId =  guid();
+  clients[clientId] = { 'connection': ws };
+  const newClient = {
+    'method' : 'connect',
+    'clientId' : clientId
+  }
+  ws.send(JSON.stringify(newClient));
+
+  console.log('Parsing session from request...');
+
+    // testing message is working and connection is working on sever side , able to recevice from client 
+  ws.on('message', async (message) => {
+        //log the received message and send it back to the client
+        //console.log('received: %s', message);
+        //ws.send(`Hello, you sent -> ${message}`);
+        
+        const result = JSON.parse(message)
+        //console.log(result)
+        //const gameId = guid();
+    
+
+         
+         if(result.method == 'create'){
+          updateGameState();
+           console.log('creating game')
+           const gameId = result.gameId;
+           const clientId = result.clientId
+           games[gameId] = {
+              "method" : 'created',
+             "message" : 'game created'  ,
+             'gameId' : gameId,
+             'clients' : [{   
+               "clientId": clientId,
+                "color": "Red"}],
+           }
+
+           const payLoad = {
+             "method" : "created",
+             "game" : games[gameId]
+           }
+
+           ws.send(JSON.stringify(payLoad))
+         }
+
+         
+         if(result.method == 'join'){
+           console.log('severs side join')
+            const clientId = result.clientId;
+            const gameId = result.gameId;
+            const game = games[gameId];
+            if (game.clients.length >= 2) 
+            {
+                //sorry max players reach
+                return;
+            }       
+            game.clients.push({
+                "clientId": clientId,
+                "color": "Blue"
+            })
+
+
+            console.log(`game player number = ${game.clients.length}` )
+
+            let CurrentGameState = await getGameState(game.gameId);
+            console.log(`current game state ` + CurrentGameState.gameState.cardDeck.length)
+            const payLoad = {
+              'method' :'join',
+              'message' : 'thanks you for joining the game',
+               "game": game,
+              'DBGameState' : CurrentGameState
+            }
+
+            console.log('sending joining game state ')
+
+            ws.send(JSON.stringify(payLoad))
+            // game.clients.forEach(c => {
+            //     //clients[c.clientId]
+            //     ws.send(JSON.stringify(payLoad))
+            // })
+            //ws.send(JSON.stringify(payLoad))
+            console.log('sending joining game state asdsadasd ')
+            if(game.clients.length === 2){
+              //update state mean getting all the data from created game and send it to 2nd player 
+              updateGameState();
+            }
+         }
+
+
+
+         if(result.method == 'update'){
+           console.log('update')
+         }
+
+
+    });
+});
+
+
+
   // render the main page
   const index = (request, response) => {
     response.render('games/index');

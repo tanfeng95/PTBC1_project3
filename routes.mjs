@@ -7,9 +7,9 @@ import initUserController from './controllers/usersController.mjs';
 
 
 
-export default function bindRoutes(app) {
-  const GamesController = initGamesController(db);
-  const UsersController = initUserController(db);
+export default function bindRoutes(app,wss) {
+  const GamesController = initGamesController(db,wss);
+  const UsersController = initUserController(db,wss);
 
   app.get('/',(req,res)=>{
     res.sendFile(resolve('dist','main.html'));
@@ -17,4 +17,5 @@ export default function bindRoutes(app) {
 
   app.get('/startGame', GamesController.create);
   app.post('/game/goFish/:id',GamesController.goFish)
+    app.post('/users/signin', UsersController.getUserById);
 }

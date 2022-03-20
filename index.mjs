@@ -2,7 +2,7 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import methodOverride from 'method-override';
 import http from 'http'
-
+import WebSocket , { WebSocketServer }   from 'ws'
 
 import bindRoutes from './routes.mjs';
 
@@ -30,56 +30,16 @@ app.use(express.static('dist'));
 // });
 
 // Bind route definitions to the Express application
-bindRoutes(app);
+
 // Set Express to listen on the given port
 const PORT = process.env.PORT || 3005;
 
+const server = http.createServer(app);
 
-//const server = http.createServer(express)
-import WebSocket , { WebSocketServer }   from 'ws'
-import sockjs from 'sockjs'
+const wss = new WebSocketServer({ server,  deserializer: () => {}});
 
-const wss = sockjs.createServer();
-//const wss = new WebSocketServer({ server });
+bindRoutes(app,wss);
 
-const clients = new Map();
-
-wss.on('connection', function connection(ws) {
-    const id = uuidv4();
-    const color = Math.floor(Math.random() * 360);
-    const metadata = { id, color };
-
-    clients.set(ws, metadata);
-
-    ws.on('message', (messageAsString) => {
-      const message = JSON.parse(messageAsString);
-      const metadata = clients.get(ws);
-      message.sender = metadata.id;
-      message.color = metadata.color;
-
-      const outbound = JSON.stringify(message);
-
-      [...clients.keys()].forEach((client) => {
-        client.write(outbound);
-      });
-    });
-
-      ws.on("close", () => {
-      clients.delete(ws);
-    });
-
+server.listen(PORT, function () {
+  console.log('Listening on http://localhost:3005');
 });
-
-function uuidv4() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
-}
-const server = http.createServer();
-wss.installHandlers(server, {prefix: '/ws'});
-server.listen(7071, '0.0.0.0');
-
-app.listen(PORT);
-
-console.log("wss up");
