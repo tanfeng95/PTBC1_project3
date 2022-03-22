@@ -120,6 +120,10 @@ const createGame = async () =>{
     //display deck 
     displayCardDeck(currentGame.cardDeck,maindeckDiv)
     playerPosition = 'player1'
+    if(playerPosition == 'player1'){
+      //Divplayer2cards.style.backgroundColor = rgba(255, 0, 0, 0.5);
+      Divplayer2cards.style.filter  = "blur(10px)"
+    }
   })
 
 }
@@ -178,6 +182,7 @@ const displayCardDeck = (deck , deckDiv) =>{
 
   const selectCardButton = document.createElement('button')
   selectCardButton.innerHTML = "select"
+  selectCardButton.setAttribute('id','selectCardButton')
   selectCardButton.addEventListener('click', () =>{GoFish()})
 
   selectDiv.append(selectCardSelect,selectCardButton)
@@ -327,7 +332,6 @@ joinGameBtn.addEventListener('click', () =>{
     if(response.method === 'created'){
       gameId = response.game.gameId
       console.log(`game created with game id = ${gameId}`)
-
     }
 
     if(response.method === 'join'){
@@ -342,6 +346,11 @@ joinGameBtn.addEventListener('click', () =>{
       currentGame = dbState
       currentPlayer = dbState.gameState.currentplayer
       playerPosition = 'player2'
+     
+      if(playerPosition == 'player2'){
+          const Divplayer1cards = document.querySelector('.Divplayer1cards')
+          Divplayer1cards.style.filter  = "blur(10px)"
+      }
       // update accordingly 
     }
 
@@ -398,6 +407,28 @@ const updateUI = (dbState) =>{
         else{
           cardStateDiv.innerHTML = `winner is  player ${dbState.gameState.winner}`
         }
+
+        const selectCardButton = document.getElementById('selectCardButton')
+        // console.log(`player postion ` + playerPosition)
+        // console.log(`current player ` + currentPlayer)
+        if(playerPosition == 'player1')
+        { 
+          if(currentPlayer == 2){
+              selectCardButton.disabled  = true
+          }else{
+            selectCardButton.disabled  = false 
+          }
+          
+        }
+       if(playerPosition == 'player2'){
+          if(currentPlayer == 1){
+            selectCardButton.disabled  = true
+          }else{
+            selectCardButton.disabled  = false 
+          }
+          
+        }
+        
 }
 
 const createDivs = () =>{

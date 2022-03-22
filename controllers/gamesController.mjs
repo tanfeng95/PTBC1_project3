@@ -125,9 +125,9 @@ const getGameState = async(gameId) =>{
 
 
 
-  wss.on('connection', function connection(ws) {
+wss.on('connection', function connection(ws) {
 
-  const updateGameState = async () =>{
+const updateGameState = async () =>{
   
     for (const g of Object.keys(games)) {
             const game = games[g]
@@ -236,12 +236,6 @@ const getGameState = async(gameId) =>{
               //update state mean getting all the data from created game and send it to 2nd player 
               updateGameState();
             }
-         }
-
-
-
-         if(result.method == 'update'){
-           console.log('update')
          }
 
 
