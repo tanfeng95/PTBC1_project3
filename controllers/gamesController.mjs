@@ -10,7 +10,7 @@
  * ========================================================
  * ========================================================
  */
-
+// #region Card Deck Functions
 // get a random index from an array given it's size
 const getRandomIndex = function (size) {
   return Math.floor(Math.random() * size);
@@ -46,7 +46,8 @@ const makeDeck = function () {
   // create the empty deck at the beginning
   const deck = [];
 
-  const suits = ['hearts', 'diamonds', 'clubs', 'spades'];
+  //const suits = ['hearts', 'diamonds', 'clubs', 'spades'];
+  const suits = ['♥', '♦', '♣', '♠'];
 
   let suitIndex = 0;
   while (suitIndex < suits.length) {
@@ -61,13 +62,13 @@ const makeDeck = function () {
 
       // 1, 11, 12 ,13
       if (cardName === 1) {
-        cardName = 'ace';
+        cardName = 'Ace';
       } else if (cardName === 11) {
-        cardName = 'jack';
+        cardName = 'Jack';
       } else if (cardName === 12) {
-        cardName = 'queen';
+        cardName = 'Queen';
       } else if (cardName === 13) {
-        cardName = 'king';
+        cardName = 'King';
       }
 
       // make a single card object variable
@@ -94,6 +95,7 @@ const guid = () => (S4() + S4() + "-" + S4() + "-4" + S4().substr(0,3) + "-" + S
     return (((1+Math.random())*0x10000)|0).toString(16).substring(1); 
 }
  
+// #endregion
 
 
 /*
@@ -109,21 +111,24 @@ const guid = () => (S4() + S4() + "-" + S4() + "-4" + S4().substr(0,3) + "-" + S
  * ========================================================
  */
 // hash map of game and clients 
-const games = {};
-const clients = {};
-
-import WebSocket , { WebSocketServer }   from 'ws'
+let games = {};
+let clients = {};
 
 export default function initGamesController(db,wss) {
 
-  
-const getGameState = async(gameId) =>{
-        const DBGameState = await db.Game.findByPk(gameId);
-        console.log(DBGameState)
-        return DBGameState;
-}
 
+// #region web socket connections and functions 
+let timeouts = [];
 
+// wss.on('request' , request =>{
+//    const connection = request.accept(null, request.origin);
+//     connection.on("open", () => console.log("opened!"))
+//     connection.on("close", () => console.log("closed!"))
+//      connection.on("message", message => {
+//         console.log('Received Message:', message.utf8Data);
+//         connection.sendUTF('Hi this is WebSocket server!');
+//      })
+// })
 
 wss.on('connection', function connection(ws) {
 
@@ -146,8 +151,9 @@ const updateGameState = async () =>{
             })
         }
 
-      setTimeout(updateGameState, 500);
+     timeouts.push(setTimeout(updateGameState, 500));
   }
+
 
 
   // opening of server and creating a new client id and make sure it connected to server 
@@ -158,8 +164,6 @@ const updateGameState = async () =>{
     'clientId' : clientId
   }
   ws.send(JSON.stringify(newClient));
-
-  console.log('Parsing session from request...');
 
     // testing message is working and connection is working on sever side , able to recevice from client 
   ws.on('message', async (message) => {
@@ -172,8 +176,9 @@ const updateGameState = async () =>{
         //const gameId = guid();
     
 
-         
+        
          if(result.method == 'create'){
+          games = {}
           updateGameState();
            console.log('creating game')
            const gameId = result.gameId;
@@ -200,6 +205,16 @@ const updateGameState = async () =>{
            console.log('severs side join')
             const clientId = result.clientId;
             const gameId = result.gameId;
+
+            if(!(gameId in games)){
+                const payLoad = {
+                'method' :'join',
+                'message' : 'gameid not in use',
+              }
+              ws.send(JSON.stringify(payLoad))
+              return;
+            }
+
             const game = games[gameId];
             if (game.clients.length >= 2) 
             {
@@ -242,8 +257,9 @@ const updateGameState = async () =>{
     });
 });
 
+// #endregion
 
-
+// #region get / post functions
   // render the main page
   const index = (request, response) => {
     response.render('games/index');
@@ -367,8 +383,6 @@ const updateGameState = async () =>{
             console.log(value)
             return value.name.toString() !=  selectedValue;
         })
-        
-
       }
       else // current player is player 2 
       {
@@ -399,12 +413,18 @@ const updateGameState = async () =>{
       {
         // switch to the other player 
         if(currentplayer==1){
-          player1Cards.push(game.gameState.cardDeck.pop())
+          // if card deck == 0 stop poping and let them play the game 
+          if(game.gameState.cardDeck.length != 0){
+              player1Cards.push(game.gameState.cardDeck.pop())
+          }
+
            currentplayer = 2
 
         }else{
+          if(game.gameState.cardDeck.length != 0){
+              player2Cards.push(game.gameState.cardDeck.pop())
+          }
           currentplayer = 1
-          player2Cards.push(game.gameState.cardDeck.pop())
         }
       }
       console.log(`current player ` + currentplayer)
@@ -452,8 +472,8 @@ const updateGameState = async () =>{
             }
             // filter out the same 4 cards 
             checkHand =  checkHand.filter(function(value, index, arr){ 
-            console.log(`check hand `+ value)
-            return value.name.toString() !=  addCardToBook;
+                console.log(`check hand `+ value)
+                return value.name.toString() !=  addCardToBook.toString();
              })
              console.log(checkHand)
             if(currentplayer ==1)
@@ -470,7 +490,7 @@ const updateGameState = async () =>{
       if(game.gameState.player1Book >= 7){
         winner = 'player 1'
       }
-           if(game.gameState.player2Book >= 7){
+      if(game.gameState.player2Book >= 7){
         winner = 'player 2'
       }
 
@@ -505,6 +525,24 @@ const updateGameState = async () =>{
     }
   }
 
+  const reload = () =>{
+    console.log('hello reload')
+    if(timeouts.length !== 0){
+      for(let i = 0 ; i < timeouts.length; i++){
+          clearTimeout(timeouts[i]);
+      }
+    }
+  }
+
+    // get game state id 
+  const getGameState = async(gameId) =>{
+          const DBGameState = await db.Game.findByPk(gameId);
+          console.log(DBGameState)
+          return DBGameState;
+  }
+
+// #endregion
+
   // return all functions we define in an object
   // refer to the routes file above to see this used
   return {
@@ -512,5 +550,6 @@ const updateGameState = async () =>{
     create,
     index,
     goFish,
+    reload
   };
 }

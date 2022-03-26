@@ -1,31 +1,44 @@
 import axios from 'axios';
 import './styles.scss';
 
+// when the page refreshes stop the timeout 
+window.addEventListener('load', (event) =>{
+  console.log('page is reloaded')
+  axios.get('/game/reload')
+})
+
+
 const mainDiv = document.querySelector('.mainDiv')
 const lobbyDiv = document.querySelector('.lobbyDiv')
 const loginDiv = document.querySelector('.loginDiv')
 let currentGame = null
 let currentPlayer  ;
 
+// #region login functions 
 
 // login screen
-const pUsername = document.createElement('p');
-pUsername.innerHTML = 'username : ';
+const LabelUsername = document.createElement('label');
+LabelUsername.innerHTML = 'Username : ';
 const inputUsername = document.createElement('input');
 inputUsername.setAttribute('type', 'text');
 
-const pPassword = document.createElement('p');
-pPassword.innerHTML = 'password : ';
+const LabelPassword = document.createElement('label');
+LabelPassword.innerHTML = 'Password : ';
 const inputPassword = document.createElement('input');
-inputPassword.setAttribute('type', 'text');
+inputPassword.setAttribute('type', 'password');
 
 const btnLogin = document.createElement('button');
-btnLogin.innerHTML = 'sign in';
+btnLogin.setAttribute('class','greenBtnClass')
+btnLogin.innerHTML = 'Sign In';
 btnLogin.addEventListener('click', () => { login(); });
 
 const pWrongInput = document.createElement('p');
 
-loginDiv.append(pUsername, inputUsername, pPassword, inputPassword, btnLogin, pWrongInput);
+
+loginDiv.append(LabelUsername, inputUsername, LabelPassword,
+   inputPassword, btnLogin, pWrongInput);
+
+
 
 let playerId;
 let playerPosition
@@ -43,39 +56,60 @@ const login = () => {
       if (data === false) {
         pWrongInput.innerHTML = 'wrong email or password';
       } else {
-        // console.log(data.getUser[0].id);
-        playerId = data.getUser[0].id;
+        playerId = data.getUser[0];
         console.log(`playerId =`  + playerId)
-        //loginDiv.style.display = 'none';
-        // create a start game button
-
-        // startGameBtn.innerHTML = 'start game';
-        // startGameBtn.addEventListener('click', () => { startGame(); });
-        // btnDiv.appendChild(startGameBtn);
+        loginDiv.style.display = 'none';
+        createLobby()
       }
     });
 };
 
+// #endregion
 
+
+// #region lobby functions 
 const createGameBtn = document.createElement('button');
-createGameBtn.innerHTML = 'create game';
-lobbyDiv.appendChild(createGameBtn);
-
-const joinGameLabel = document.createElement('label')
-joinGameLabel.innerHTML = 'game id'
-lobbyDiv.appendChild(joinGameLabel)
-
-const joinGameInput = document.createElement('input')
-joinGameInput.setAttribute('type','text')
-lobbyDiv.appendChild(joinGameInput)
-
+createGameBtn.setAttribute('class','greenBtnClass')
 const joinGameBtn = document.createElement('button');
-joinGameBtn.innerHTML = 'join game'
-lobbyDiv.appendChild(joinGameBtn)
+joinGameBtn.setAttribute('class','greenBtnClass')
+const joinGameLabel = document.createElement('label')
+const joinGameInput = document.createElement('input')
+const labelPlayer1ID = document.createElement('label')
+const createLobby = () =>{
+
+    // labelPlayer1ID.innerHTML = 'Name :'
+    lobbyDiv.append(labelPlayer1ID)
+    const labelPlayer1Name = document.createElement('label')
+    //labelPlayer1Name.innerHTML = playerId.email
+    lobbyDiv.append(labelPlayer1Name)
+
+ 
+    createGameBtn.innerHTML = 'Create Game';
+    lobbyDiv.appendChild(createGameBtn);
+
+
+    joinGameLabel.innerHTML = 'Game Id : '
+    lobbyDiv.appendChild(joinGameLabel)
+
+    joinGameInput.setAttribute('type','text')
+    lobbyDiv.appendChild(joinGameInput)
+
+
+    joinGameBtn.innerHTML = 'Join Game'
+    lobbyDiv.appendChild(joinGameBtn)
+}
+    
+
+
+
 
 
 
 const createGame = async () =>{
+  const mainDiv = document.querySelector('.mainDiv')
+  mainDiv.innerHTML = ''
+  mainDiv.style.display = ''
+
   const maindeckDiv = document.createElement('div')
   maindeckDiv.setAttribute('class','maindeckDiv')
   const player1CardsDiv = document.createElement('div')
@@ -83,7 +117,7 @@ const createGame = async () =>{
   
   // player 1 name
   const DivPlayer1Name = document.createElement('div')
-  DivPlayer1Name.innerHTML = 'player 1'
+  DivPlayer1Name.innerHTML = `Player 1 `
     // this is the card div for cards 
   const Divplayer1cards = document.createElement('div')
   Divplayer1cards.setAttribute('class','Divplayer1cards')
@@ -96,7 +130,7 @@ const createGame = async () =>{
   player2CardsDiv.setAttribute('class', 'player2CardsDiv')
 
   const DivPlayer2Name = document.createElement('div')
-  DivPlayer2Name.innerHTML = 'player 2'
+  DivPlayer2Name.innerHTML = 'Player 2'
   // this is the card div for cards 
   const Divplayer2cards = document.createElement('div')
   Divplayer2cards.setAttribute('class','Divplayer2cards')
@@ -111,19 +145,20 @@ const createGame = async () =>{
   .then((gameState)=>{
     currentGame = gameState.data;
     currentPlayer = currentGame.currentplayer;
-    console.log(currentPlayer)
-    console.log(currentGame.player1Hand)
-    console.log(currentGame.player2Hand)
+    // console.log(currentPlayer)
+    console.log(currentGame)
+    // console.log(currentGame.player2Hand)
     // display player1 and player 2 cards 
     displayCards(currentGame.player1Hand , Divplayer1cards)
     displayCards(currentGame.player2Hand , Divplayer2cards)
     //display deck 
-    displayCardDeck(currentGame.cardDeck,maindeckDiv)
+    //displayCardDeck(currentGame.cardDeck,maindeckDiv)
+    displayCardDeck(currentGame,maindeckDiv)
     playerPosition = 'player1'
     if(playerPosition == 'player1'){
-      //Divplayer2cards.style.backgroundColor = rgba(255, 0, 0, 0.5);
       Divplayer2cards.style.filter  = "blur(10px)"
     }
+
   })
 
 }
@@ -144,22 +179,22 @@ const displayCards = (playerhand, playerDiv) =>{
     }
 } 
 
-const cardRankArray = ['ace','2','3','4','5','6','7','8'
-,'9','10','jack','queen','king']
+const cardRankArray = ['Ace','2','3','4','5','6','7','8'
+,'9','10','Jack','Queen','King']
 
-const displayCardDeck = (deck , deckDiv) =>{
+const displayCardDeck = (currentGame , deckDiv) =>{
 
   // left handle card deck count and card deck image
   const leftDeckDiv = document.createElement('div')
   leftDeckDiv.setAttribute('class','leftDeckDiv');
   const remaindingcardDiv = document.createElement('div')
   remaindingcardDiv.setAttribute('class','remaindingcardDiv')
-  remaindingcardDiv.innerHTML = `remainding cards in deck = ${deck.length}`
+  remaindingcardDiv.innerHTML = `Remainding cards in deck = ${currentGame.cardDeck.length}`
   const numberofBookDiv  = document.createElement('div')
   numberofBookDiv.setAttribute('class' , 'numberofBookDiv')
   numberofBookDiv.innerHTML = 
-  `player 1 book = 0 </br>
-   player 2 book = 0`
+  `Player 1 book = 0 </br>
+   Player 2 book = 0`
 
   leftDeckDiv.append(remaindingcardDiv,numberofBookDiv)
 
@@ -172,6 +207,15 @@ const displayCardDeck = (deck , deckDiv) =>{
   cardStateDiv.setAttribute('class','cardStateDiv')
   cardStateDiv.innerHTML =`current state = player 1 go first`
 
+  const gameIDDiv = document.createElement('div')
+  gameIDDiv.innerHTML = `Game Id = ${currentGame.id}`
+
+  const resetBtn = document.createElement('button')
+  resetBtn.innerHTML = 'Back to lobby'
+  resetBtn.setAttribute('class','selectBtnClass')
+  resetBtn.addEventListener('click',() =>{ backToLobby()})
+
+
   const selectCardSelect = document.createElement('select')
   selectCardSelect.setAttribute('id','selectCardSelect')
   for(let i = 0 ; i < cardRankArray.length ; i ++){
@@ -181,7 +225,8 @@ const displayCardDeck = (deck , deckDiv) =>{
   }
 
   const selectCardButton = document.createElement('button')
-  selectCardButton.innerHTML = "select"
+  selectCardButton.setAttribute('class','selectBtnClass')
+  selectCardButton.innerHTML = "Select"
   selectCardButton.setAttribute('id','selectCardButton')
   selectCardButton.addEventListener('click', () =>{GoFish()})
 
@@ -189,7 +234,7 @@ const displayCardDeck = (deck , deckDiv) =>{
 
   
 
-  middleDeckDiv.append(selectDiv,cardStateDiv)
+  middleDeckDiv.append(selectDiv,cardStateDiv,gameIDDiv,resetBtn)
 
 
 
@@ -197,7 +242,7 @@ const displayCardDeck = (deck , deckDiv) =>{
   const rightDeckDiv = document.createElement('div')
   rightDeckDiv.setAttribute('class','rightDeckDiv');
   const RuleHeader = document.createElement('label')
-  RuleHeader.innerHTML = 'rules';
+  RuleHeader.innerHTML = 'Rules';
   var link = document.createElement("a");
   link.setAttribute('href' , "https://www.youtube.com/watch?v=hRpXLSMdve0" )
   link.setAttribute('target','_blank')
@@ -207,6 +252,19 @@ const displayCardDeck = (deck , deckDiv) =>{
   deckDiv.append(leftDeckDiv,middleDeckDiv,rightDeckDiv);
 }
 
+const backToLobby = ()=>{
+  const mainDiv = document.querySelector('.mainDiv')
+  const lobbyDiv = document.querySelector('.lobbyDiv')
+  mainDiv.style.display = "none"
+  lobbyDiv.style.display =''
+  axios.get('/game/reload')
+
+  createLobby()
+}
+// #endregion
+
+
+// #region game play function 
 // go fish logic 
 const GoFish =  () =>{
   const getSelect = document.getElementById('selectCardSelect')
@@ -262,7 +320,10 @@ const GoFish =  () =>{
 
 
 }
+// #endregion
 
+
+// #region websocket functions 
 
 // then to call it, plus stitch in '4' in the third group
 const guid = () => (S4() + S4() + "-" + S4() + "-4" + S4().substr(0,3) + "-" + S4() + "-" + S4() + S4() + S4()).toLowerCase();
@@ -301,16 +362,17 @@ let clientId = null;
         clientId : clientId
     }
     ws.send(JSON.stringify(createNewGame))
-   
+    lobbyDiv.style.display = 'none'
 })
 
 joinGameBtn.addEventListener('click', () =>{
 
-    
+  console.log(joinGameInput.value)
 
     if(gameId == null){
       gameId = joinGameInput.value
     }
+    gameId = joinGameInput.value
 
     const joinGame = {
       'method' : 'join',
@@ -320,7 +382,7 @@ joinGameBtn.addEventListener('click', () =>{
 
 
     ws.send(JSON.stringify(joinGame));
-
+    lobbyDiv.style.display = 'none'
 })
 
 
@@ -338,11 +400,16 @@ joinGameBtn.addEventListener('click', () =>{
       const joiningMessage = response.message;
       console.log(joiningMessage)
       console.log(response.game)
+      if(joiningMessage == 'gameid not in use'){
+        lobbyDiv.style.display = ''
+        return
+      }
       const dbState = response.DBGameState;
       console.log(dbState)
       createDivs()
       const maindeckDiv = document.querySelector('.maindeckDiv')
-      displayCardDeck(dbState.gameState.cardDeck,maindeckDiv)
+      dbState.gameState.id = dbState.id
+      displayCardDeck(dbState.gameState,maindeckDiv)
       currentGame = dbState
       currentPlayer = dbState.gameState.currentplayer
       playerPosition = 'player2'
@@ -366,15 +433,6 @@ joinGameBtn.addEventListener('click', () =>{
       updateUI(dbState);
     }
   }
-
-  
-  // document.body.onmousemove = (evt) => {
-  //       const messageBody = { x: evt.clientX, y: evt.clientY };
-  //       ws.send(JSON.stringify(messageBody));
-  // };
-
-
-
  })();
 
 const updateUI = (dbState) =>{
@@ -422,14 +480,16 @@ const updateUI = (dbState) =>{
         }
        if(playerPosition == 'player2'){
           if(currentPlayer == 1){
+            console.log('player 1 button disabled')
             selectCardButton.disabled  = true
           }else{
             selectCardButton.disabled  = false 
           }
           
         }
-        
 }
+
+
 
 const createDivs = () =>{
 
@@ -464,3 +524,5 @@ const createDivs = () =>{
 
    
 }
+
+// #endregion

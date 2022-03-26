@@ -11,21 +11,29 @@
   padding: 10px;
   margin: 10px;
   border: 1px solid grey;
-  width: 28%;
+  width: fit-content;
+  text-align: center;
+  block-size: fit-content;
 }
 
 .Divplayer1cards {
   display: flex;
+  flex-wrap: wrap;
+  height: 25%;
+  justify-content: center;
 }
 
 .Divplayer2cards {
   display: flex;
+  flex-wrap: wrap;
+  height: 25%;
+  justify-content: center;
 }
 
 .maindeckDiv {
   display: flex;
   justify-content: space-between;
-  height: 50vh;
+  height: 50%;
   align-items: center;
 }
 
@@ -37,4 +45,46 @@
 .middleDeckDiv {
   display: flex;
   flex-direction: column;
+
+  justify-content: center;
+}
+
+/* Full-width inputs */
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+.greenBtnClass {
+  background-color: #04aa6d;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+.selectBtnClass {
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+label {
+  padding: 10px;
+  margin: 8px 0;
+}
+
+select {
+  align-items: center;
+  width: 100%;
+  text-align: center;
 }

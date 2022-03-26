@@ -17,5 +17,6 @@ export default function bindRoutes(app,wss) {
 
   app.get('/startGame', GamesController.create);
   app.post('/game/goFish/:id',GamesController.goFish)
-    app.post('/users/signin', UsersController.getUserById);
+  app.post('/users/signin', UsersController.getUserById);
+  app.get('/game/reload',GamesController.reload);
 }
