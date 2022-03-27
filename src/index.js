@@ -11,6 +11,7 @@ window.addEventListener('load', (event) =>{
 const mainDiv = document.querySelector('.mainDiv')
 const lobbyDiv = document.querySelector('.lobbyDiv')
 const loginDiv = document.querySelector('.loginDiv')
+const RuleDiv = document.querySelector('.rulesDiv')
 let currentGame = null
 let currentPlayer  ;
 
@@ -246,7 +247,7 @@ const displayCardDeck = (currentGame , deckDiv) =>{
   var link = document.createElement("a");
   link.setAttribute('href' , "https://www.youtube.com/watch?v=hRpXLSMdve0" )
   link.setAttribute('target','_blank')
-  link.innerHTML = 'link to youtube about rules'
+  link.innerHTML = 'Link to youtube about rules and how to play'
   rightDeckDiv.append(RuleHeader,link);
 
   deckDiv.append(leftDeckDiv,middleDeckDiv,rightDeckDiv);
@@ -295,17 +296,17 @@ const GoFish =  () =>{
         // update books 
         const numberofBookDiv = document.querySelector('.numberofBookDiv')
         numberofBookDiv.innerHTML = 
-        `player 1 book = ${data.player1Book} </br>
-        player 2 book = ${data.player2Book}`
+        `Player 1 book = ${data.player1Book} </br>
+        Player 2 book = ${data.player2Book}`
 
         // update remainding cards 
         const remaindingcardDiv = document.querySelector('.remaindingcardDiv')
-        remaindingcardDiv.innerHTML = `remainding cards in deck = ${data.remanindingCards.length}`
+        remaindingcardDiv.innerHTML = `Remainding cards in deck = ${data.remanindingCards.length}`
 
         // update current state 
         const cardStateDiv = document.querySelector('.cardStateDiv')
         if(data.winner === ''){
-          cardStateDiv.innerHTML = `current state = player ${data.currentplayer}`
+          cardStateDiv.innerHTML = `Current state = player ${data.currentplayer}`
           currentPlayer = data.currentplayer;
         } 
         else{
@@ -449,24 +450,27 @@ const updateUI = (dbState) =>{
         // update books 
         const numberofBookDiv = document.querySelector('.numberofBookDiv')
         numberofBookDiv.innerHTML = 
-        `player 1 book = ${dbState.gameState.player1Book} </br>
-        player 2 book = ${dbState.gameState.player2Book}`
+        `Player 1 books = ${dbState.gameState.player1Book} </br>
+        Player 2 books = ${dbState.gameState.player2Book}`
 
         // update remainding cards 
         const remaindingcardDiv = document.querySelector('.remaindingcardDiv')
-        remaindingcardDiv.innerHTML = `remainding cards in deck = ${dbState.gameState.cardDeck.length}`
+        remaindingcardDiv.innerHTML = `Remainding cards in deck = ${dbState.gameState.cardDeck.length}`
 
         // update current state 
         const cardStateDiv = document.querySelector('.cardStateDiv')
+        const selectCardButton = document.getElementById('selectCardButton')
         if(dbState.gameState.winner === ''){
-          cardStateDiv.innerHTML = `current state = player ${dbState.gameState.currentplayer}`
+          cardStateDiv.innerHTML = `Current state = player ${dbState.gameState.currentplayer}`
           currentPlayer = dbState.gameState.currentplayer;
         } 
         else{
-          cardStateDiv.innerHTML = `winner is  player ${dbState.gameState.winner}`
+          cardStateDiv.innerHTML = `Winner is  player ${dbState.gameState.winner}
+                                    </br> please return to lobby and create a new game `
+          selectCardButton.disabled = true;
         }
 
-        const selectCardButton = document.getElementById('selectCardButton')
+        
         // console.log(`player postion ` + playerPosition)
         // console.log(`current player ` + currentPlayer)
         if(playerPosition == 'player1')
@@ -526,3 +530,42 @@ const createDivs = () =>{
 }
 
 // #endregion
+
+// #region rules div 
+
+const ruleHeaderDiv = document.createElement('div')
+const h3Header = document.createElement('h3')
+h3Header.innerHTML = "How to play : Go Fish"
+const rulesIntrolabel = document.createElement('p')
+rulesIntrolabel.innerHTML = 'Go Fish is a fun game that will amuse and entertain even the youngest card players. It is similar to the game Authors.'
+ruleHeaderDiv.append(h3Header,rulesIntrolabel)
+
+const ruleBodyDiv = document.createElement('div')
+
+const ThePackHeader = document.createElement('h6')
+ThePackHeader.innerHTML = 'THE PACK'
+const packIntro = document.createElement('p')
+packIntro.innerHTML = 'The standard 52-card pack is used. Some cards will be dealt and the rest will form the stock pile.'
+
+const TheObjectiveHeader = document.createElement('h6')
+TheObjectiveHeader.innerHTML = 'OBJECTIVE OF THE GAME'
+const ObjectiveIntro = document.createElement('p')
+ObjectiveIntro.innerHTML = 'The goal is to win the most "books" of cards. A book is any four of a kind, such as four kings, four aces, and so on.'
+
+
+const TheDealHeader = document.createElement('h6')
+TheDealHeader.innerHTML = 'THE DEAL'
+const DealIntro = document.createElement('P')
+DealIntro.innerHTML = 'Any player deals one card face up to each player. The player with the lowest card is the dealer. The dealer shuffles the cards, and the player to the right cuts them. </br>The dealer completes the cut and deals the cards clockwise one at a time, face down, beginning with the player to the left. If two or three people are playing, each player receives seven cards. If four or five people are playing, each receives five cards. The remainder of the pack is placed face down on the table to form the stock.'
+
+const ThePlayHeader = document.createElement('h6')
+ThePlayHeader.innerHTML = 'THE PLAY'
+const PlayIntro = document.createElement('P')
+PlayIntro.innerHTML = `The player to the left of the dealer looks directly at any opponent and says, for example, "Give me your kings," usually addressing the opponent by name and specifying the rank that they want, from ace down to two. The player who is "fishing “must have at least one card of the rank that was asked for in their hand. The player who is addressed must hand over all the cards requested. If the player has none, they say, "Go fish!" and the player who made the request draws the top card of the stock and places it in their hand.</br>If a player gets one or more cards of the named rank that was asked for, they are entitled to ask the same or another player for a card. The player can ask for the same card or a different one. So long as the player succeeds in getting cards (makes a catch), their turn continues. When a player makes a catch, they must reveal the card so that the catch is verified. If a player gets the fourth card of a book, the player shows all four cards, places them on the table face up in front of everyone, and plays again.</br>If the player goes fishing without "making a catch" (does not receive a card he asked for), the turn passes to the left.</br>The game ends when all thirteen books have been won. The winner is the player with the most books. During the game, if a player is left without cards, they may (when it's their turn to play), draw from the stock and then ask for cards of that rank. If there are no cards left in the stock, they are out of the game.`
+
+
+ruleBodyDiv.append(ThePackHeader,packIntro,TheObjectiveHeader
+  ,ObjectiveIntro,TheDealHeader,DealIntro,ThePlayHeader,PlayIntro)
+RuleDiv.append(ruleHeaderDiv,ruleBodyDiv)
+// #endregion
+
