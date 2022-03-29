@@ -180,7 +180,7 @@ const updateGameState = async () =>{
          if(result.method == 'create'){
           games = {}
           updateGameState();
-           console.log('creating game')
+           //console.log('creating game')
            const gameId = result.gameId;
            const clientId = result.clientId
            games[gameId] = {
@@ -202,7 +202,7 @@ const updateGameState = async () =>{
 
          
          if(result.method == 'join'){
-           console.log('severs side join')
+           //console.log('severs side join')
             const clientId = result.clientId;
             const gameId = result.gameId;
 
@@ -227,10 +227,10 @@ const updateGameState = async () =>{
             })
 
 
-            console.log(`game player number = ${game.clients.length}` )
+           // console.log(`game player number = ${game.clients.length}` )
 
             let CurrentGameState = await getGameState(game.gameId);
-            console.log(`current game state ` + CurrentGameState.gameState.cardDeck.length)
+            //console.log(`current game state ` + CurrentGameState.gameState.cardDeck.length)
             const payLoad = {
               'method' :'join',
               'message' : 'thanks you for joining the game',
@@ -238,7 +238,7 @@ const updateGameState = async () =>{
               'DBGameState' : CurrentGameState
             }
 
-            console.log('sending joining game state ')
+            //console.log('sending joining game state ')
 
             ws.send(JSON.stringify(payLoad))
             // game.clients.forEach(c => {
@@ -246,7 +246,7 @@ const updateGameState = async () =>{
             //     ws.send(JSON.stringify(payLoad))
             // })
             //ws.send(JSON.stringify(payLoad))
-            console.log('sending joining game state asdsadasd ')
+            //console.log('sending joining game state asdsadasd ')
             if(game.clients.length === 2){
               //update state mean getting all the data from created game and send it to 2nd player 
               updateGameState();
@@ -260,6 +260,7 @@ const updateGameState = async () =>{
 // #endregion
 
 // #region get / post functions
+
   // render the main page
   const index = (request, response) => {
     response.render('games/index');
@@ -297,13 +298,22 @@ const updateGameState = async () =>{
 
       // send the new game back to the user.
       // dont include the deck so the user can't cheat
-      response.send({
+      // response.send({
+      //   id: game.id,
+      //   cardDeck : game.gameState.cardDeck,
+      //   player1Hand: game.gameState.player1Hand,
+      //   player2Hand: game.gameState.player2Hand,
+      //   player1Book : game.gameState.player1Book,
+      //   player2Book : game.gameState.player2Book,
+      //   currentplayer : game.gameState.currentplayer,
+      //   winner : game.gameState.winner,
+      // });
+            response.send({
         id: game.id,
         cardDeck : game.gameState.cardDeck,
         player1Hand: game.gameState.player1Hand,
         player2Hand: game.gameState.player2Hand,
         player1Book : game.gameState.player1Book,
-        player2Book : game.gameState.player2Book,
         currentplayer : game.gameState.currentplayer,
         winner : game.gameState.winner,
       });
@@ -351,8 +361,8 @@ const updateGameState = async () =>{
   
 
   const goFish =  async (request,response) =>{
-    console.log(request.params.id)
-    console.log(request.body.card)
+    //console.log(request.params.id)
+    //console.log(request.body.card)
 
     try{
       const game = await db.Game.findByPk(request.params.id);
@@ -363,8 +373,8 @@ const updateGameState = async () =>{
       let winner = game.gameState.winner;
   
       let selectedValue = request.body.card
-      console.log(selectedValue)
-      console.log(`current player = ` + currentplayer)
+      //console.log(selectedValue)
+      //console.log(`current player = ` + currentplayer)
       // if current player is player 1
       if(currentplayer === 1) 
       {
@@ -380,7 +390,7 @@ const updateGameState = async () =>{
           }
           // remove the from array 
         player2Cards =  player2Cards.filter(function(value, index, arr){ 
-            console.log(value)
+            //console.log(value)
             return value.name.toString() !=  selectedValue;
         })
       }
@@ -397,13 +407,13 @@ const updateGameState = async () =>{
         }
           // remove the from array 
             player1Cards =  player1Cards.filter(function(value, index, arr){ 
-            console.log(value)
+            //console.log(value)
             return value.name.toString() !=  selectedValue;
         })
 
       }    
 
-      console.log(didplayerGetCard)
+      //console.log(didplayerGetCard)
       // change the current player turn 
       if(didplayerGetCard === true){ 
         currentplayer = request.body.currentPlayer
@@ -427,7 +437,7 @@ const updateGameState = async () =>{
           currentplayer = 1
         }
       }
-      console.log(`current player ` + currentplayer)
+      //console.log(`current player ` + currentplayer)
 
       // check if there any books then remove them and update game state 
       //i only need to check the winners 
@@ -441,7 +451,7 @@ const updateGameState = async () =>{
           }else{
             checkHand = player2Cards
           }
-          console.log(checkHand)
+          //console.log(checkHand)
           for(let i = 0 ; i < checkHand.length; i++)
           {
             var cardName = checkHand[i].name;
@@ -472,10 +482,10 @@ const updateGameState = async () =>{
             }
             // filter out the same 4 cards 
             checkHand =  checkHand.filter(function(value, index, arr){ 
-                console.log(`check hand `+ value)
+                //console.log(`check hand `+ value)
                 return value.name.toString() !=  addCardToBook.toString();
              })
-             console.log(checkHand)
+             //console.log(checkHand)
             if(currentplayer ==1)
             {
               player1Cards = checkHand
@@ -526,7 +536,7 @@ const updateGameState = async () =>{
   }
 
   const reload = () =>{
-    console.log('hello reload')
+    //console.log('hello reload')
     if(timeouts.length !== 0){
       for(let i = 0 ; i < timeouts.length; i++){
           clearTimeout(timeouts[i]);
@@ -537,7 +547,7 @@ const updateGameState = async () =>{
     // get game state id 
   const getGameState = async(gameId) =>{
           const DBGameState = await db.Game.findByPk(gameId);
-          console.log(DBGameState)
+          //console.log(DBGameState)
           return DBGameState;
   }
 

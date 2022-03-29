@@ -3,7 +3,7 @@ import './styles.scss';
 
 // when the page refreshes stop the timeout 
 window.addEventListener('load', (event) =>{
-  console.log('page is reloaded')
+  //console.log('page is reloaded')
   axios.get('/game/reload')
 })
 
@@ -37,9 +37,7 @@ const pWrongInput = document.createElement('p');
 
 
 loginDiv.append(LabelUsername, inputUsername, LabelPassword,
-   inputPassword, btnLogin, pWrongInput);
-
-
+   inputPassword, btnLogin, pWrongInput)
 
 let playerId;
 let playerPosition
@@ -52,18 +50,60 @@ const login = () => {
   axios
     .post('/users/signin', data)
     .then((response) => {
-      console.log(response);
+      //console.log(response);
       const { data } = response;
       if (data === false) {
         pWrongInput.innerHTML = 'wrong email or password';
       } else {
         playerId = data.getUser[0];
-        console.log(`playerId =`  + playerId)
+        //console.log(`playerId =`  + playerId)
         loginDiv.style.display = 'none';
         createLobby()
       }
     });
 };
+
+const signupDiv = document.createElement('div')
+
+// const LabelUsernameSignup = document.createElement('label');
+// LabelUsernameSignup.innerHTML = 'Username : ';
+// const inputUsernameSignup = document.createElement('input');
+// inputUsernameSignup.setAttribute('type', 'text');
+
+// const LabelPasswordSignup = document.createElement('label');
+// LabelPasswordSignup.innerHTML = 'Password : ';
+// const inputPasswordSignup = document.createElement('input');
+// inputPasswordSignup.setAttribute('type', 'password');
+
+const btnLoginSignup = document.createElement('button');
+btnLoginSignup.setAttribute('class','greenBtnClass')
+btnLoginSignup.innerHTML = 'Sign up';
+btnLoginSignup.addEventListener('click', () => { signup(); });
+
+signupDiv.append(btnLoginSignup)
+
+loginDiv.append(signupDiv)
+
+const signup = () =>{
+    const data = {
+    username: inputUsername.value,
+    password: inputPassword.value,
+  };
+  axios
+    .post('/users/signup', data)
+    .then((response) => {
+      //console.log(response)
+
+      const {data} = response;
+      if(data === false){
+        pWrongInput.innerHTML = 'User name have been used';
+      }else if(data !== null)
+      {
+         pWrongInput.innerHTML = 'User Created able to sign in';
+      }
+
+    });
+}
 
 // #endregion
 
@@ -147,7 +187,7 @@ const createGame = async () =>{
     currentGame = gameState.data;
     currentPlayer = currentGame.currentplayer;
     // console.log(currentPlayer)
-    console.log(currentGame)
+    //console.log(currentGame)
     // console.log(currentGame.player2Hand)
     // display player1 and player 2 cards 
     displayCards(currentGame.player1Hand , Divplayer1cards)
@@ -265,27 +305,28 @@ const backToLobby = ()=>{
 // #endregion
 
 
-// #region game play function 
+// #region game play function
+
 // go fish logic 
 const GoFish =  () =>{
   const getSelect = document.getElementById('selectCardSelect')
-  console.log(getSelect.value)
-  console.log(getSelect.selectedIndex)
+  //console.log(getSelect.value)
+  //console.log(getSelect.selectedIndex)
   const playerSelectedCard = { 
     card : getSelect.value,
     currentPlayer : currentPlayer };
-  console.log(playerSelectedCard)
-  console.log(`currentGame = ` +currentGame)
+  //console.log(playerSelectedCard)
+  //console.log(`currentGame = ` +currentGame)
   try{
        axios
       .post(`/game/goFish/${currentGame.id}`,playerSelectedCard)
       .then((response)=>{
         // need to update results 
-        console.log(response)
+        //console.log(response)
         const data = response.data 
         // update player 1 hand 
         const player1cardDiv = document.querySelector('.Divplayer1cards')
-        console.log(player1cardDiv)
+        //console.log(player1cardDiv)
         player1cardDiv.innerHTML = ''
         displayCards(data.player1Hand,player1cardDiv)
         // update player 2 hand
@@ -368,7 +409,7 @@ let clientId = null;
 
 joinGameBtn.addEventListener('click', () =>{
 
-  console.log(joinGameInput.value)
+  //console.log(joinGameInput.value)
 
     if(gameId == null){
       gameId = joinGameInput.value
@@ -394,19 +435,19 @@ joinGameBtn.addEventListener('click', () =>{
 
     if(response.method === 'created'){
       gameId = response.game.gameId
-      console.log(`game created with game id = ${gameId}`)
+      //console.log(`game created with game id = ${gameId}`)
     }
 
     if(response.method === 'join'){
       const joiningMessage = response.message;
-      console.log(joiningMessage)
-      console.log(response.game)
+      //console.log(joiningMessage)
+      //console.log(response.game)
       if(joiningMessage == 'gameid not in use'){
         lobbyDiv.style.display = ''
         return
       }
       const dbState = response.DBGameState;
-      console.log(dbState)
+      //console.log(dbState)
       createDivs()
       const maindeckDiv = document.querySelector('.maindeckDiv')
       dbState.gameState.id = dbState.id
@@ -424,7 +465,7 @@ joinGameBtn.addEventListener('click', () =>{
 
     if(response.method === 'connect'){
       clientId = response.clientId
-      console.log(`client id set successfullt id = ${clientId}`)
+      //console.log(`client id set successfullt id = ${clientId}`)
     }
 
     if(response.method === 'update'){
@@ -484,7 +525,7 @@ const updateUI = (dbState) =>{
         }
        if(playerPosition == 'player2'){
           if(currentPlayer == 1){
-            console.log('player 1 button disabled')
+            //console.log('player 1 button disabled')
             selectCardButton.disabled  = true
           }else{
             selectCardButton.disabled  = false 
