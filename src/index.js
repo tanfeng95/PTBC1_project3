@@ -512,8 +512,8 @@ const updateUI = (dbState) =>{
         }
 
         
-        // console.log(`player postion ` + playerPosition)
-        // console.log(`current player ` + currentPlayer)
+        console.log(`player postion ` + playerPosition)
+        console.log(`current player ` + currentPlayer)
         if(playerPosition == 'player1')
         { 
           if(currentPlayer == 2){
